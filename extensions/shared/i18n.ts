@@ -34,6 +34,12 @@ export interface Translations {
   labelProgressBarColor: string
   ribbonWatched: string
   ribbonSeen: string
+  btnDeleteAccountLink: string
+  deleteAccountWarning: string
+  btnConfirmDelete: string
+  btnDeletingAccount: string
+  btnCancelDelete: string
+  errDeleteFailed: string
 }
 
 const en: Translations = {
@@ -72,6 +78,12 @@ const en: Translations = {
   labelProgressBarColor: 'Progress bar color',
   ribbonWatched: 'watched',
   ribbonSeen: 'seen',
+  btnDeleteAccountLink: 'Delete account',
+  deleteAccountWarning: 'This will permanently delete your account and all watch history. You will be asked to sign in again to confirm.',
+  btnConfirmDelete: 'Re-authenticate & Delete My Account',
+  btnDeletingAccount: 'Deleting…',
+  btnCancelDelete: '← Cancel',
+  errDeleteFailed: 'Account deletion failed.',
 }
 
 const ptBR: Translations = {
@@ -110,6 +122,12 @@ const ptBR: Translations = {
   labelProgressBarColor: 'Cor da barra de progresso',
   ribbonWatched: 'visto',
   ribbonSeen: 'parcial',
+  btnDeleteAccountLink: 'Excluir conta',
+  deleteAccountWarning: 'Isso excluirá permanentemente sua conta e todo o histórico de visualização. Você precisará entrar novamente para confirmar.',
+  btnConfirmDelete: 'Autenticar e Excluir Minha Conta',
+  btnDeletingAccount: 'Excluindo…',
+  btnCancelDelete: '← Cancelar',
+  errDeleteFailed: 'Falha ao excluir a conta.',
 }
 
 const es: Translations = {
@@ -148,6 +166,12 @@ const es: Translations = {
   labelProgressBarColor: 'Color de la barra de progreso',
   ribbonWatched: 'visto',
   ribbonSeen: 'parcial',
+  btnDeleteAccountLink: 'Eliminar cuenta',
+  deleteAccountWarning: 'Esto eliminará permanentemente tu cuenta y todo el historial de visualización. Se te pedirá que inicies sesión de nuevo para confirmar.',
+  btnConfirmDelete: 'Autenticar y Eliminar Mi Cuenta',
+  btnDeletingAccount: 'Eliminando…',
+  btnCancelDelete: '← Cancelar',
+  errDeleteFailed: 'Error al eliminar la cuenta.',
 }
 
 const ja: Translations = {
@@ -186,6 +210,12 @@ const ja: Translations = {
   labelProgressBarColor: 'プログレスバーの色',
   ribbonWatched: '視聴済',
   ribbonSeen: '途中',
+  btnDeleteAccountLink: 'アカウントを削除',
+  deleteAccountWarning: 'アカウントとすべての視聴履歴が完全に削除されます。確認のため再度サインインが必要です。',
+  btnConfirmDelete: '再認証してアカウントを削除する',
+  btnDeletingAccount: '削除中…',
+  btnCancelDelete: '← キャンセル',
+  errDeleteFailed: 'アカウントの削除に失敗しました。',
 }
 
 const fr: Translations = {
@@ -224,6 +254,12 @@ const fr: Translations = {
   labelProgressBarColor: 'Couleur de la barre de progression',
   ribbonWatched: 'vu',
   ribbonSeen: 'partiel',
+  btnDeleteAccountLink: 'Supprimer le compte',
+  deleteAccountWarning: 'Cela supprimera définitivement votre compte et tout l\'historique de visionnage. Vous devrez vous reconnecter pour confirmer.',
+  btnConfirmDelete: 'Se reconnecter et supprimer mon compte',
+  btnDeletingAccount: 'Suppression…',
+  btnCancelDelete: '← Annuler',
+  errDeleteFailed: 'Échec de la suppression du compte.',
 }
 
 function detect(): Translations {

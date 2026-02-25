@@ -7,8 +7,8 @@
  *   - All persistent state lives in chrome.storage.local (SW memory is ephemeral).
  */
 
-import { login, logout, getValidAccessToken } from '../auth/flow'
-import { bulkSync, queryProgress, register, forgotPassword } from '../api/client'
+import { login, logout, reAuthenticate, getValidAccessToken } from '../auth/flow'
+import { bulkSync, queryProgress, register, forgotPassword, deleteAccount } from '../api/client'
 import { BgMessage, ProgressEntry } from '../types'
 import { QUEUE_KEY } from '../constants'
 
@@ -82,6 +82,20 @@ async function handleMessage(msg: BgMessage): Promise<unknown> {
       if (!token) return { progress: [] }
       const progress = await queryProgress(msg.urls).catch(() => [])
       return { progress }
+    }
+
+    case 'DELETE_ACCOUNT': {
+      // Force the user to re-enter credentials; the resulting token's auth_time
+      // is checked server-side to authorize the destructive operation.
+      const reauth = await reAuthenticate()
+      if (!reauth.ok) return reauth
+
+      const result = await deleteAccount()
+      if (result.ok) {
+        await chrome.storage.local.remove(QUEUE_KEY)
+        await logout()
+      }
+      return result
     }
 
     case 'TRIGGER_SYNC':

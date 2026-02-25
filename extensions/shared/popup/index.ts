@@ -55,6 +55,14 @@ const syncCount = $('sync-count')
 const btnSync   = $('btn-sync')
 const btnLogout = $('btn-logout')
 
+const panelUser            = $('panel-user')
+const panelDelete          = $('panel-delete')
+const btnDeleteAccountLink = $('btn-delete-account-link')
+const deleteWarning        = $('delete-warning')
+const btnConfirmDelete     = $('btn-confirm-delete') as HTMLButtonElement
+const deleteMsg            = $('delete-msg')
+const btnCancelDelete      = $('btn-cancel-delete')
+
 const cfgBarColor = $input('cfg-bar-color')
 
 // ── Translations ──────────────────────────────────────────────────────────────
@@ -80,6 +88,10 @@ function applyTranslations(): void {
 
   btnSync.textContent   = t.btnSyncNow
   btnLogout.textContent = t.btnSignOut
+  btnDeleteAccountLink.textContent = t.btnDeleteAccountLink
+  deleteWarning.textContent        = t.deleteAccountWarning
+  btnConfirmDelete.textContent     = t.btnConfirmDelete
+  btnCancelDelete.textContent      = t.btnCancelDelete
 
   const summary = document.querySelector<HTMLElement>('details summary')
   if (summary) summary.textContent = t.settingsLabel
@@ -100,6 +112,9 @@ function showLoggedOut(): void {
   dot.classList.remove('online')
   authSection.classList.remove('hidden')
   userSection.classList.add('hidden')
+  // Reset delete panel so it doesn't show stale state next login
+  panelDelete.classList.add('hidden')
+  panelUser.classList.remove('hidden')
 }
 
 // ── Sync status ───────────────────────────────────────────────────────────────
@@ -312,6 +327,39 @@ btnSync.addEventListener('click', async () => {
 btnLogout.addEventListener('click', async () => {
   await sendMsg({ type: 'LOGOUT' })
   showLoggedOut()
+})
+
+// ── Delete account ────────────────────────────────────────────────────────────
+
+btnDeleteAccountLink.addEventListener('click', () => {
+  panelUser.classList.add('hidden')
+  panelDelete.classList.remove('hidden')
+  deleteMsg.textContent = ''
+  deleteMsg.className = 'msg'
+})
+
+btnCancelDelete.addEventListener('click', () => {
+  panelDelete.classList.add('hidden')
+  panelUser.classList.remove('hidden')
+})
+
+btnConfirmDelete.addEventListener('click', async () => {
+  deleteMsg.textContent = ''
+  deleteMsg.className = 'msg'
+  btnConfirmDelete.textContent = t.btnDeletingAccount
+  btnConfirmDelete.disabled = true
+
+  const res = await sendMsg({ type: 'DELETE_ACCOUNT' }) as OkResponse
+
+  btnConfirmDelete.textContent = t.btnConfirmDelete
+  btnConfirmDelete.disabled = false
+
+  if (res?.ok) {
+    showLoggedOut()
+  } else {
+    deleteMsg.className = 'msg error'
+    deleteMsg.textContent = res?.error ?? t.errDeleteFailed
+  }
 })
 
 // ── Settings ──────────────────────────────────────────────────────────────────

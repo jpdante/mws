@@ -113,4 +113,17 @@ public class KeycloakAdminService {
     var response = await _http.SendAsync(request, ct);
     response.EnsureSuccessStatusCode();
   }
+
+  public async Task DeleteUserAsync(Guid keycloakId, CancellationToken ct = default) {
+    var token = await GetAdminTokenAsync(ct);
+    var adminApi = _options.AdminApiEndpoint?.ToString()
+      ?? throw new InvalidOperationException("Keycloak AdminApiEndpoint is not configured.");
+
+    using var request = new HttpRequestMessage(
+      HttpMethod.Delete, $"{adminApi}/users/{keycloakId}");
+    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+    var response = await _http.SendAsync(request, ct);
+    response.EnsureSuccessStatusCode();
+  }
 }

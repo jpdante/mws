@@ -13,6 +13,20 @@ import { generateCodeVerifier, generateCodeChallenge } from './pkce'
  *   - Request "offline_access" scope to receive a long-lived refresh token.
  */
 export async function login(): Promise<{ ok: boolean; error?: string }> {
+  return performLogin()
+}
+
+/**
+ * Forces the user to re-enter their Keycloak credentials (prompt=login), even if
+ * they already have an active session. The resulting token will have a recent
+ * auth_time claim, which the API uses to authorize sensitive operations like
+ * account deletion.
+ */
+export async function reAuthenticate(): Promise<{ ok: boolean; error?: string }> {
+  return performLogin('login')
+}
+
+async function performLogin(prompt?: string): Promise<{ ok: boolean; error?: string }> {
   try {
     const redirectUrl = chrome.identity.getRedirectURL()
 
@@ -26,6 +40,7 @@ export async function login(): Promise<{ ok: boolean; error?: string }> {
     authUrl.searchParams.set('scope',                 'openid profile email offline_access')
     authUrl.searchParams.set('code_challenge',        challenge)
     authUrl.searchParams.set('code_challenge_method', 'S256')
+    if (prompt) authUrl.searchParams.set('prompt', prompt)
 
     const resultUrl = await chrome.identity.launchWebAuthFlow({
       url: authUrl.toString(),

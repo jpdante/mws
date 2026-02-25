@@ -26,6 +26,7 @@ export type BgMessage =
   | { type: 'GET_STATUS' }
   | { type: 'PROGRESS_UPDATE'; entry: ProgressEntry }
   | { type: 'QUERY_PROGRESS'; urls: string[] }
+  | { type: 'DELETE_ACCOUNT' }
   | { type: 'TRIGGER_SYNC' }
 
 export interface StatusResponse {

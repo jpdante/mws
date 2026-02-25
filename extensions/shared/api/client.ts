@@ -54,6 +54,21 @@ export async function register(
 }
 
 /**
+ * Permanently deletes the account. The caller must first obtain a fresh token via
+ * reAuthenticate() — the API enforces a recent auth_time claim on the JWT.
+ */
+export async function deleteAccount(): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const res = await apiFetch('/auth/account', { method: 'DELETE' })
+    if (res.status === 403) return { ok: false, error: 'reauth_required' }
+    if (!res.ok)            return { ok: false, error: `Request failed (${res.status}).` }
+    return { ok: true }
+  } catch {
+    return { ok: false, error: 'Network error — check your connection.' }
+  }
+}
+
+/**
  * Sends a password-reset email via the backend (which calls Keycloak Admin API).
  * Always resolves ok:true — the API never reveals whether the email is registered.
  */

@@ -182,6 +182,14 @@
       margin-bottom: 2px;
     }
 
+    /* ── Delete warning ── */
+    .delete-warning {
+      font-size: 12px;
+      color: #f87171;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+
     /* ── Utils ── */
     .hidden { display: none !important; }
   </style>
@@ -242,7 +250,9 @@
 
   <!-- ── Logged-in ── -->
   <div id="user-section" class="hidden">
-    <div class="section">
+
+    <!-- Main user panel -->
+    <div class="section" id="panel-user">
       <div class="user-name" id="user-display">
         —
         <span id="user-email"></span>
@@ -250,7 +260,17 @@
       <div class="sync-count" id="sync-count"></div>
       <button class="btn btn-secondary" id="btn-sync" disabled>Sync Now</button>
       <button class="btn btn-danger"    id="btn-logout">Sign Out</button>
+      <button class="link-btn"          id="btn-delete-account-link">Delete account</button>
     </div>
+
+    <!-- Delete confirmation panel -->
+    <div class="section hidden" id="panel-delete">
+      <p class="delete-warning" id="delete-warning"></p>
+      <button class="btn btn-danger" id="btn-confirm-delete">Permanently Delete My Account</button>
+      <div class="msg" id="delete-msg"></div>
+      <button class="link-btn" id="btn-cancel-delete">← Cancel</button>
+    </div>
+
   </div>
 
   <!-- ── Settings (always visible) ── -->
