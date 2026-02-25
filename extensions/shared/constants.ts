@@ -1,4 +1,4 @@
-export const API_BASE = 'https://localhost:7215/api/v1'
+export const API_BASE = 'https://mws.tryhosting.com.br/api/v1'
 
 export const KEYCLOAK_CLIENT_ID = 'mws-ext'
 

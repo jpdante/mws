@@ -1,39 +1,42 @@
-/services:
+services:
   mywatchstate:
     image: mywatchstate
     build:
       context: .
       dockerfile: MyWatchState/Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=mywatchstate;Username=postgres;Password=postgres
-      # Point these at your external Keycloak instance:
-      - Keycloak__Url=http://localhost:8080
-      - Keycloak__Realm=mywatchstate
-      - Keycloak__ClientId=mywatchstate-extension
-      - Keycloak__AdminClientId=mywatchstate-backend
-      - Keycloak__AdminClientSecret=change-me
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
+      - ConnectionStrings__DefaultConnection=Host=${DB_HOST:-postgres};Port=${DB_PORT:-5432};Database=${DB_NAME:-mywatchstate};Username=${DB_USER:-postgres};Password=${DB_PASSWORD}
+      - Keycloak__Url=${KEYCLOAK_URL}
+      - Keycloak__Realm=${KEYCLOAK_REALM}
+      - Keycloak__ClientId=${KEYCLOAK_CLIENT_ID}
+      - Keycloak__AdminClientId=${KEYCLOAK_ADMIN_CLIENT_ID}
+      - Keycloak__AdminClientSecret=${KEYCLOAK_ADMIN_CLIENT_SECRET}
+      - AllowedOrigins__0=${ALLOWED_ORIGIN_0:-}
+      - AllowedOrigins__1=${ALLOWED_ORIGIN_1:-}
     ports:
-      - "5000:8080"
+      - "${APP_PORT:-5000}:8080"
     depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
 
   postgres:
     image: postgres:17-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: mywatchstate
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-mywatchstate}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
 volumes:
   postgres_data:
