@@ -43,11 +43,14 @@ public class Program {
           .GetSection("AllowedOrigins")
           .Get<string[]>() ?? [];
 
-        if (builder.Environment.IsDevelopment()) {
-          policy.SetIsOriginAllowed(_ => true).AllowAnyHeader().AllowAnyMethod();
-        } else {
-          policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod();
-        }
+        policy
+          .SetIsOriginAllowed(origin => {
+            var scheme = new Uri(origin).Scheme;
+            if (scheme is "chrome-extension" or "moz-extension") return true;
+            return builder.Environment.IsDevelopment() || origins.Contains(origin);
+          })
+          .AllowAnyHeader()
+          .AllowAnyMethod();
       });
     });
 
