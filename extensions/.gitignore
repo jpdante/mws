@@ -1,0 +1,16 @@
+## Dependencies
+node_modules/
+
+## Build output — esbuild bundles TS into these subdirs.
+## The manifests at chrome/manifest.json and firefox/manifest.json are source files and ARE tracked.
+chrome/background/
+chrome/content/
+chrome/popup/
+chrome/icons/
+firefox/background/
+firefox/content/
+firefox/popup/
+firefox/icons/
+
+## Dev sourcemaps (emitted in watch mode)
+*.js.map

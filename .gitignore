@@ -1,0 +1,38 @@
+## Build artifacts
+bin/
+obj/
+out/
+
+## NuGet
+packages/
+*.nupkg
+*.snupkg
+
+## Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+
+## JetBrains Rider
+riderModule.iml
+/_ReSharper.Caches/
+
+## Published output
+publish/
+
+## Secrets (never commit)
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+*.pfx
+*.p12
+
+## Claude Code
+.claude/
+CLAUDE.md
+
+## OS
+.DS_Store
+Thumbs.db
+desktop.ini

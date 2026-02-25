@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>MyWatchState</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 300px;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 13px;
+      background: #111;
+      color: #e2e2e2;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border-bottom: 1px solid #222;
+    }
+    header h1 { font-size: 14px; font-weight: 600; }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #444;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    .status-dot.online { background: #22c55e; }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #222;
+    }
+    .tab {
+      flex: 1;
+      padding: 9px 0;
+      text-align: center;
+      cursor: pointer;
+      color: #666;
+      background: none;
+      border: none;
+      font-size: 13px;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab.active { color: #e2e2e2; border-bottom-color: #2563eb; }
+
+    /* ── Section ── */
+    .section { padding: 12px 14px; }
+
+    /* ── Forms ── */
+    label {
+      display: block;
+      margin-bottom: 3px;
+      color: #888;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      display: block;
+      width: 100%;
+      padding: 7px 10px;
+      background: #1c1c1c;
+      border: 1px solid #2e2e2e;
+      border-radius: 6px;
+      color: #e2e2e2;
+      font-size: 13px;
+      transition: border-color 0.15s;
+    }
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus { outline: none; border-color: #4b5563; }
+    input.invalid { border-color: #7f1d1d; }
+    input.valid   { border-color: #166534; }
+
+    /* ── Field error ── */
+    .field-error {
+      display: block;
+      font-size: 11px;
+      color: #f87171;
+      min-height: 14px;
+      margin: 2px 0 6px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      margin-top: 6px;
+    }
+    .btn:hover:not(:disabled) { opacity: 0.82; }
+    .btn:disabled { opacity: 0.45; cursor: default; }
+    .btn-primary   { background: #2563eb; color: #fff; }
+    .btn-secondary { background: #262626; color: #e2e2e2; }
+    .btn-danger    { background: #7f1d1d; color: #f87171; }
+
+    /* ── Link button ── */
+    .link-btn {
+      background: none;
+      border: none;
+      color: #4b5563;
+      font-size: 12px;
+      cursor: pointer;
+      padding: 4px 0;
+      margin-top: 4px;
+      display: block;
+      width: 100%;
+      text-align: left;
+    }
+    .link-btn:hover { color: #9ca3af; }
+
+    /* ── Feedback ── */
+    .msg {
+      font-size: 12px;
+      margin-top: 5px;
+      min-height: 16px;
+    }
+    .msg.error   { color: #f87171; }
+    .msg.success { color: #4ade80; }
+    .msg.info    { color: #60a5fa; }
+
+    /* ── User panel ── */
+    .user-name {
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .user-name span { color: #9ca3af; font-weight: 400; font-size: 12px; display: block; margin-top: 1px; }
+
+    /* ── Settings accordion ── */
+    details { border-top: 1px solid #222; }
+    details summary {
+      padding: 10px 14px;
+      cursor: pointer;
+      color: #666;
+      font-size: 12px;
+      user-select: none;
+      list-style: none;
+    }
+    details summary::-webkit-details-marker { display: none; }
+    details summary::before { content: '⚙  '; }
+    details[open] summary { color: #9ca3af; }
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .color-row label { margin: 0; flex: 1; text-transform: uppercase; }
+    input[type="color"] {
+      width: 36px; height: 26px;
+      padding: 2px 3px;
+      border: 1px solid #2e2e2e;
+      border-radius: 5px;
+      background: #1c1c1c;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* ── Sync count ── */
+    .sync-count {
+      font-size: 11px;
+      color: #6b7280;
+      text-align: center;
+      min-height: 14px;
+      margin-bottom: 2px;
+    }
+
+    /* ── Utils ── */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="status-dot" id="dot"></div>
+    <h1>MyWatchState</h1>
+  </header>
+
+  <!-- ── Logged-out: Sign In / Register / Forgot tabs ── -->
+  <div id="auth-section">
+    <div class="tabs" id="auth-tabs">
+      <button class="tab active" id="tab-login">Sign In</button>
+      <button class="tab"        id="tab-register">Register</button>
+    </div>
+
+    <!-- Sign In panel -->
+    <div class="section" id="panel-login">
+      <button class="btn btn-primary" id="btn-login">Sign in with Keycloak</button>
+      <div class="msg error" id="login-error"></div>
+      <button class="link-btn" id="btn-forgot-link">Forgot password?</button>
+    </div>
+
+    <!-- Register panel -->
+    <div class="section hidden" id="panel-register">
+      <label for="reg-username">Username</label>
+      <input type="text"     id="reg-username" autocomplete="username" placeholder="at least 3 characters">
+      <span class="field-error" id="err-username"></span>
+
+      <label for="reg-email">Email</label>
+      <input type="email"    id="reg-email"    autocomplete="email">
+      <span class="field-error" id="err-email"></span>
+
+      <label for="reg-password">Password</label>
+      <input type="password" id="reg-password" autocomplete="new-password" placeholder="at least 8 characters">
+      <span class="field-error" id="err-password"></span>
+
+      <label for="reg-password-confirm">Confirm Password</label>
+      <input type="password" id="reg-password-confirm" autocomplete="new-password">
+      <span class="field-error" id="err-password-confirm"></span>
+
+      <button class="btn btn-primary" id="btn-register" disabled>Create Account</button>
+      <div class="msg" id="register-msg"></div>
+    </div>
+
+    <!-- Forgot password panel (replaces tabs when active) -->
+    <div class="section hidden" id="panel-forgot">
+      <label for="forgot-email">Email address</label>
+      <input type="email" id="forgot-email" autocomplete="email" placeholder="your@email.com">
+
+      <button class="btn btn-primary" id="btn-forgot">Send Reset Link</button>
+      <div class="msg" id="forgot-msg"></div>
+      <button class="link-btn" id="btn-back-login">← Back to sign in</button>
+    </div>
+  </div>
+
+  <!-- ── Logged-in ── -->
+  <div id="user-section" class="hidden">
+    <div class="section">
+      <div class="user-name" id="user-display">
+        —
+        <span id="user-email"></span>
+      </div>
+      <div class="sync-count" id="sync-count"></div>
+      <button class="btn btn-secondary" id="btn-sync" disabled>Sync Now</button>
+      <button class="btn btn-danger"    id="btn-logout">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- ── Settings (always visible) ── -->
+  <details>
+    <summary>Settings</summary>
+    <div class="section">
+      <div class="color-row">
+        <label for="cfg-bar-color">Progress bar color</label>
+        <input type="color" id="cfg-bar-color" value="#3b82f6">
+      </div>
+    </div>
+  </details>
+
+  <script src="index.js" type="module"></script>
+</body>
+</html>
