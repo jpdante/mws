@@ -36,21 +36,14 @@ public class Program {
 
     builder.Services.AddAuthorization();
 
-    // ── CORS — allow browser extension origins ────────────────────────────────
+    // ── CORS — allow everything (temporary) ──────────────────────────────────
     builder.Services.AddCors(options => {
       options.AddPolicy("Extensions", policy => {
-        var origins = builder.Configuration
-          .GetSection("AllowedOrigins")
-          .Get<string[]>() ?? [];
-
         policy
-          .SetIsOriginAllowed(origin => {
-            var scheme = new Uri(origin).Scheme;
-            if (scheme is "chrome-extension" or "moz-extension") return true;
-            return builder.Environment.IsDevelopment() || origins.Contains(origin);
-          })
+          .SetIsOriginAllowed(_ => true)
           .AllowAnyHeader()
-          .AllowAnyMethod();
+          .AllowAnyMethod()
+          .AllowCredentials();
       });
     });
 
