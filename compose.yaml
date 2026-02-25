@@ -1,6 +1,5 @@
 services:
   mywatchstate:
-    image: mywatchstate
     build:
       context: .
       dockerfile: MyWatchState/Dockerfile
