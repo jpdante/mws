@@ -36,14 +36,13 @@ public class Program {
 
     builder.Services.AddAuthorization();
 
-    // ── CORS — allow everything (temporary) ──────────────────────────────────
+    // ── CORS — allow all origins ──────────────────────────────────────────────
     builder.Services.AddCors(options => {
       options.AddPolicy("Extensions", policy => {
         policy
-          .SetIsOriginAllowed(_ => true)
+          .AllowAnyOrigin()
           .AllowAnyHeader()
-          .AllowAnyMethod()
-          .AllowCredentials();
+          .AllowAnyMethod();
       });
     });
 
@@ -104,8 +103,8 @@ public class Program {
       app.MapOpenApi();
     }
 
-    app.UseHttpsRedirection();
     app.UseCors("Extensions");
+    app.UseHttpsRedirection();
     app.UseRateLimiter();
     app.UseAuthentication();
     app.UseAuthorization();

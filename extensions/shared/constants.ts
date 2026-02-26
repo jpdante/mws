@@ -13,7 +13,7 @@ export const KEYCLOAK_ENDPOINTS = {
  * Fraction of video duration that counts as "completed".
  * 95% matches YouTube's own internal watched metric and is the widely accepted threshold.
  */
-export const COMPLETION_THRESHOLD = 0.95
+export const COMPLETION_THRESHOLD = 0.80
 
 /** chrome.storage.sync key for user-configurable extension settings. */
 export const SETTINGS_KEY = 'mws_settings'
