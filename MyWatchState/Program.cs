@@ -5,12 +5,16 @@ using Microsoft.EntityFrameworkCore;
 using MyWatchState.Config;
 using MyWatchState.Infrastructure.Data;
 using MyWatchState.Infrastructure.Services;
+using Serilog;
 
 namespace MyWatchState;
 
 public class Program {
   public static async Task Main(string[] args) {
     var builder = WebApplication.CreateBuilder(args);
+
+    builder.Host.UseSerilog((ctx, lc) =>
+      lc.ReadFrom.Configuration(ctx.Configuration));
 
     var keycloak = builder.Configuration
       .GetSection("Keycloak")
@@ -103,6 +107,7 @@ public class Program {
       app.MapOpenApi();
     }
 
+    app.UseSerilogRequestLogging();
     app.UseCors("Extensions");
     app.UseHttpsRedirection();
     app.UseRateLimiter();
