@@ -96,7 +96,7 @@ public static class UrlNormalizer {
       var lastDash = slug.LastIndexOf('-');
       if (lastDash >= 0) {
         var trailingPart = slug[(lastDash + 1)..];
-        if (trailingPart.Length > 0 && trailingPart.All(char.IsAsciiDigit))
+        if (trailingPart.Length > 0)
           return new NormalizedUrl(
             $"https://xhamster.com/videos/{slug}",
             VideoPlatform.XHamster, trailingPart);
