@@ -16,8 +16,12 @@ namespace MyWatchState.Controllers;
 [Authorize]
 public class ProgressController : ControllerBase {
   private readonly AppDbContext _db;
+  private readonly ILogger<ProgressController> _log;
 
-  public ProgressController(AppDbContext db) => _db = db;
+  public ProgressController(AppDbContext db, ILogger<ProgressController> log) {
+    _db  = db;
+    _log = log;
+  }
 
   /// <summary>
   /// Bulk upsert watch progress. The extension calls this every ~60s with buffered entries.
@@ -33,14 +37,39 @@ public class ProgressController : ControllerBase {
     var user = await GetOrCreateUserAsync(ct);
     var now = DateTimeOffset.UtcNow;
 
-    // Normalize and deduplicate URLs within this batch.
+    _log.LogInformation("Bulk: received {Count} entries from user {UserId}", request.Entries.Count, user.Id);
+
+    // Normalize all entries and log each result for visibility
+    var allNormalized = request.Entries
+      .Select(e => (Raw: e, Normalized: UrlNormalizer.Normalize(e.Url)))
+      .ToList();
+
+    foreach (var (raw, norm) in allNormalized) {
+      _log.LogDebug(
+        "Bulk normalize: raw={RawUrl} → url={NormalizedUrl} platform={Platform} videoId={VideoId}",
+        raw.Url, norm.Url, norm.Platform, norm.PlatformVideoId ?? "(null)");
+    }
+
     // Drop entries where a known platform couldn't extract a video ID — those are
     // non-video pages (e.g. /feed, /channel) that shouldn't be tracked.
-    var entries = request.Entries
-      .Select(e => (Raw: e, Normalized: UrlNormalizer.Normalize(e.Url)))
-      .Where(e => e.Normalized.Platform == VideoPlatform.Generic || e.Normalized.PlatformVideoId != null)
+    var entries = allNormalized
+      .Where(e => {
+        var keep = e.Normalized.Platform == VideoPlatform.Generic || e.Normalized.PlatformVideoId != null;
+        if (!keep)
+          _log.LogInformation(
+            "Bulk drop (no video ID): raw={RawUrl} platform={Platform}",
+            e.Raw.Url, e.Normalized.Platform);
+        return keep;
+      })
       .DistinctBy(e => e.Normalized.Url)
       .ToList();
+
+    _log.LogInformation("Bulk: {Kept}/{Total} entries passed normalization filter", entries.Count, request.Entries.Count);
+
+    if (entries.Count == 0) {
+      _log.LogWarning("Bulk: all entries were dropped — nothing to save");
+      return NoContent();
+    }
 
     var urls = entries.Select(e => e.Normalized.Url).ToHashSet();
 
@@ -49,14 +78,22 @@ public class ProgressController : ControllerBase {
       .Where(v => urls.Contains(v.Url))
       .ToDictionaryAsync(v => v.Url, ct);
 
+    _log.LogInformation("Bulk: {Existing} existing / {New} new videos",
+      existingVideos.Count, urls.Count - existingVideos.Count);
+
     var newVideos = entries
       .Where(e => !existingVideos.ContainsKey(e.Normalized.Url))
-      .Select(e => new Video {
-        Url = e.Normalized.Url,
-        Platform = e.Normalized.Platform,
-        PlatformVideoId = e.Normalized.PlatformVideoId,
-        Title = e.Raw.Title,
-        DurationSeconds = e.Raw.DurationSeconds,
+      .Select(e => {
+        _log.LogInformation(
+          "Bulk new video: url={Url} platform={Platform} videoId={VideoId} title={Title}",
+          e.Normalized.Url, e.Normalized.Platform, e.Normalized.PlatformVideoId ?? "(null)", e.Raw.Title ?? "(null)");
+        return new Video {
+          Url = e.Normalized.Url,
+          Platform = e.Normalized.Platform,
+          PlatformVideoId = e.Normalized.PlatformVideoId,
+          Title = e.Raw.Title,
+          DurationSeconds = e.Raw.DurationSeconds,
+        };
       })
       .ToList();
 
@@ -64,6 +101,7 @@ public class ProgressController : ControllerBase {
       _db.Videos.AddRange(newVideos);
       await _db.SaveChangesAsync(ct); // flush to obtain generated IDs
       foreach (var v in newVideos) existingVideos[v.Url] = v;
+      _log.LogInformation("Bulk: inserted {Count} new video rows", newVideos.Count);
     }
 
     var videoIds = existingVideos.Values.Select(v => v.Id).ToList();
