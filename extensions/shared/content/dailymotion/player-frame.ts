@@ -13,6 +13,5 @@ function onPlayerUpdate(state: PlayerState): void {
   })
 }
 
-// Only initialise when we can resolve a canonical dailymotion.com video URL
-// (i.e. we're embedded on a dailymotion.com video page, not some arbitrary embed).
+console.debug('[MWS/DM player-frame] content script loaded in:', location.href)
 initPlayer(onPlayerUpdate)

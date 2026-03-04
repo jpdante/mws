@@ -21,8 +21,9 @@ function injectStyles(): void {
   style.textContent = `
     :root { --mws-dm-bar-color: ${DEFAULT_COLOR}; }
 
-    /* Thumbnail anchor needs to be the positioning context for the overlay */
-    [data-mws] a[aria-hidden="true"][href^="/video/"] { position: relative !important; overflow: hidden !important; display: block !important; }
+    /* The anchor is already position:absolute (fills the FixedRatioDiv).
+       Only add overflow:hidden to clip the ribbon — don't touch position. */
+    [data-mws] a[aria-hidden="true"][href^="/video/"] { overflow: hidden !important; }
 
     /* Full-thumbnail overlay */
     .${OVERLAY_CLASS} {
