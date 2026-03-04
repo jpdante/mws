@@ -15,18 +15,23 @@ const isWatch = process.argv.includes('--watch')
 
 /** Each entry point: source → output path (relative to outdir) */
 const entries = [
-  { in: 'shared/background/service-worker.ts', out: 'background/service-worker' },
-  { in: 'shared/content/youtube/index.ts',     out: 'content/youtube/index'     },
-  { in: 'shared/popup/index.ts',               out: 'popup/index'               },
+  { in: 'shared/background/service-worker.ts',        out: 'background/service-worker'        },
+  { in: 'shared/content/youtube/index.ts',            out: 'content/youtube/index'            },
+  { in: 'shared/content/xhamster/index.ts',           out: 'content/xhamster/index'           },
+  { in: 'shared/content/dailymotion/index.ts',        out: 'content/dailymotion/index'        },
+  { in: 'shared/content/dailymotion/player-frame.ts', out: 'content/dailymotion/player-frame' },
+  { in: 'shared/popup/index.ts',                      out: 'popup/index'                      },
 ]
 
 const ICONS = ['icon16.png', 'icon48.png', 'icon128.png']
 
 /** Prepare output directory structure and copy static assets. */
 async function prepare(outdir) {
-  await mkdir(`${outdir}/background`,      { recursive: true })
-  await mkdir(`${outdir}/content/youtube`, { recursive: true })
-  await mkdir(`${outdir}/popup`,           { recursive: true })
+  await mkdir(`${outdir}/background`,       { recursive: true })
+  await mkdir(`${outdir}/content/youtube`,  { recursive: true })
+  await mkdir(`${outdir}/content/xhamster`,    { recursive: true })
+  await mkdir(`${outdir}/content/dailymotion`, { recursive: true })
+  await mkdir(`${outdir}/popup`,               { recursive: true })
   await mkdir(`${outdir}/icons`,           { recursive: true })
   await copyFile('shared/popup/index.html', `${outdir}/popup/index.html`)
   await Promise.all(ICONS.map(f => copyFile(`shared/icons/${f}`, `${outdir}/icons/${f}`)))

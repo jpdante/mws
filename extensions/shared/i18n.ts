@@ -2,7 +2,7 @@ export interface Translations {
   tabSignIn: string
   tabRegister: string
   btnSignIn: string
-  btnOpeningKeycloak: string
+  btnSigningIn: string
   forgotPassword: string
   labelUsername: string
   placeholderUsername: string
@@ -45,8 +45,8 @@ export interface Translations {
 const en: Translations = {
   tabSignIn: 'Sign In',
   tabRegister: 'Register',
-  btnSignIn: 'Sign in with Keycloak',
-  btnOpeningKeycloak: 'Opening Keycloak…',
+  btnSignIn: 'Sign In',
+  btnSigningIn: 'Signing in…',
   forgotPassword: 'Forgot password?',
   labelUsername: 'Username',
   placeholderUsername: 'at least 3 characters',
@@ -89,8 +89,8 @@ const en: Translations = {
 const ptBR: Translations = {
   tabSignIn: 'Entrar',
   tabRegister: 'Registrar',
-  btnSignIn: 'Entrar com Keycloak',
-  btnOpeningKeycloak: 'Abrindo Keycloak…',
+  btnSignIn: 'Entrar',
+  btnSigningIn: 'Entrando…',
   forgotPassword: 'Esqueceu a senha?',
   labelUsername: 'Usuário',
   placeholderUsername: 'pelo menos 3 caracteres',
@@ -133,8 +133,8 @@ const ptBR: Translations = {
 const es: Translations = {
   tabSignIn: 'Iniciar sesión',
   tabRegister: 'Registrarse',
-  btnSignIn: 'Iniciar sesión con Keycloak',
-  btnOpeningKeycloak: 'Abriendo Keycloak…',
+  btnSignIn: 'Iniciar sesión',
+  btnSigningIn: 'Iniciando sesión…',
   forgotPassword: '¿Olvidó su contraseña?',
   labelUsername: 'Usuario',
   placeholderUsername: 'al menos 3 caracteres',
@@ -177,8 +177,8 @@ const es: Translations = {
 const ja: Translations = {
   tabSignIn: 'ログイン',
   tabRegister: '登録',
-  btnSignIn: 'Keycloakでログイン',
-  btnOpeningKeycloak: 'Keycloakを開いています…',
+  btnSignIn: 'ログイン',
+  btnSigningIn: 'ログイン中…',
   forgotPassword: 'パスワードをお忘れですか？',
   labelUsername: 'ユーザー名',
   placeholderUsername: '3文字以上',
@@ -221,8 +221,8 @@ const ja: Translations = {
 const fr: Translations = {
   tabSignIn: 'Connexion',
   tabRegister: 'Inscription',
-  btnSignIn: 'Se connecter avec Keycloak',
-  btnOpeningKeycloak: 'Ouverture de Keycloak…',
+  btnSignIn: 'Se connecter',
+  btnSigningIn: 'Connexion en cours…',
   forgotPassword: 'Mot de passe oublié ?',
   labelUsername: "Nom d'utilisateur",
   placeholderUsername: 'au moins 3 caractères',

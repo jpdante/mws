@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "MyWatchState",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Track your video watch progress across websites.",
   "permissions": [
     "storage",
@@ -9,7 +9,10 @@
     "identity"
   ],
   "host_permissions": [
-    "https://www.youtube.com/*"
+    "https://www.youtube.com/*",
+    "https://xhamster.com/*",
+    "https://www.dailymotion.com/*",
+    "https://geo.dailymotion.com/*"
   ],
   "background": {
     "service_worker": "background/service-worker.js",
@@ -20,6 +23,22 @@
       "matches": ["https://www.youtube.com/*"],
       "js": ["content/youtube/index.js"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://xhamster.com/*"],
+      "js": ["content/xhamster/index.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.dailymotion.com/*"],
+      "js": ["content/dailymotion/index.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://geo.dailymotion.com/*"],
+      "js": ["content/dailymotion/player-frame.js"],
+      "run_at": "document_idle",
+      "all_frames": true
     }
   ],
   "action": {

@@ -1,6 +1,9 @@
 ## Dependencies
 node_modules/
 
+## npm lock file — project uses pnpm; package-lock.json is stale if present
+package-lock.json
+
 ## Build output — esbuild bundles TS into these subdirs.
 ## The manifests at chrome/manifest.json and firefox/manifest.json are source files and ARE tracked.
 chrome/background/

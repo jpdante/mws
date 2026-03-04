@@ -17,6 +17,8 @@ public static class UrlNormalizer {
       "youtube.com" or "m.youtube.com" => NormalizeYouTube(uri),
       "youtu.be"                        => NormalizeYouTuBe(uri),
       "vimeo.com"                       => NormalizeVimeo(uri),
+      "dailymotion.com"                 => NormalizeDailymotion(uri),
+      "xhamster.com"                    => NormalizeXHamster(uri),
       _                                 => NormalizeGeneric(uri),
     };
   }
@@ -67,6 +69,43 @@ public static class UrlNormalizer {
     return new NormalizedUrl(
       $"https://vimeo.com{uri.AbsolutePath}",
       VideoPlatform.Vimeo, null);
+  }
+
+  private static NormalizedUrl NormalizeDailymotion(Uri uri) {
+    // Video URLs: /video/{id} where id is alphanumeric (e.g. x9abc123)
+    var parts = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+    if (parts.Length >= 2 && parts[0].Equals("video", StringComparison.OrdinalIgnoreCase)) {
+      var videoId = parts[1];
+      if (!string.IsNullOrEmpty(videoId))
+        return new NormalizedUrl(
+          $"https://www.dailymotion.com/video/{videoId}",
+          VideoPlatform.Dailymotion, videoId);
+    }
+
+    return new NormalizedUrl(
+      $"https://www.dailymotion.com{uri.AbsolutePath}",
+      VideoPlatform.Dailymotion, null);
+  }
+
+  private static NormalizedUrl NormalizeXHamster(Uri uri) {
+    // Video URLs: /videos/{slug} where slug ends with a numeric ID (e.g. some-title-12345678)
+    var parts = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+    if (parts.Length >= 2 && parts[0].Equals("videos", StringComparison.OrdinalIgnoreCase)) {
+      var slug = parts[1];
+      // Extract trailing numeric ID from slug (e.g. "some-title-12345678" → "12345678")
+      var lastDash = slug.LastIndexOf('-');
+      if (lastDash >= 0) {
+        var trailingPart = slug[(lastDash + 1)..];
+        if (trailingPart.Length > 0 && trailingPart.All(char.IsAsciiDigit))
+          return new NormalizedUrl(
+            $"https://xhamster.com/videos/{slug}",
+            VideoPlatform.XHamster, trailingPart);
+      }
+    }
+
+    return new NormalizedUrl(
+      $"https://xhamster.com{uri.AbsolutePath}",
+      VideoPlatform.XHamster, null);
   }
 
   // Generic: strip query string and fragment, keep scheme + host + path

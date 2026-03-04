@@ -8,11 +8,14 @@ const OVERLAY_CLASS = "mws-overlay";
 const STYLES_ID = "mws-styles";
 const DEFAULT_COLOR = "#3b82f6";
 
-/**
- * Selector for the thumbnail anchor in YouTube's current view-model markup.
- * Replaces the legacy "a#thumbnail" which no longer exists.
- */
+/** Selector for the thumbnail anchor in YouTube's lockup view-model markup (home, subscriptions, some search builds). */
 const THUMB_LINK_SEL = "a.yt-lockup-view-model__content-image";
+
+interface ThumbnailRef {
+  anchor: HTMLAnchorElement;
+  /** Element where the MWS overlay is injected and sized to the image. */
+  container: Element;
+}
 
 /** YouTube thumbnail renderer tag names to scan (lowercase for fast Set lookup). */
 const RENDERER_TAG_NAMES = new Set([
@@ -33,7 +36,7 @@ function injectStyles(): void {
   style.textContent = `
     :root { --mws-bar-color: ${DEFAULT_COLOR}; }
 
-    /* yt-thumbnail-view-model is sized exactly to the image — overlay lives here */
+    /* Sized thumbnail container for lockup markup — overlay lives here */
     [data-mws] yt-thumbnail-view-model { position: relative !important; overflow: hidden; display: block; }
 
     /* Full-thumbnail overlay */
@@ -61,7 +64,7 @@ function injectStyles(): void {
       position: absolute;
       top: 14px;
       right: -20px;
-      width: 78px;
+      width: 88px;
       padding: 4px 0;
       color: rgba(255, 255, 255, 0.95);
       font-size: 8.5px;
@@ -86,6 +89,9 @@ function injectStyles(): void {
       background: rgba(255, 255, 255, 0.18);
       z-index: 6;
     }
+    /* Legacy markup (channel pages) has larger thumbnails — bump bar by 1px */
+    div#overlays .mws-progress-track { height: 4px; }
+
     .mws-progress-fill {
       height: 100%;
       background: var(--mws-bar-color);
@@ -110,26 +116,50 @@ function applyProgressBarColor(color: string): void {
   document.documentElement.style.setProperty("--mws-bar-color", color);
 }
 
-function findThumbnailAnchor(renderer: Element): HTMLAnchorElement | null {
-  // Primary: light DOM — covers div.yt-lockup-view-model (compact) and
-  // yt-lockup-view-model when it projects children via light DOM (rich grid).
-  const light = renderer.querySelector<HTMLAnchorElement>(THUMB_LINK_SEL);
-  if (light) return light;
+/**
+ * Finds the thumbnail anchor and its sized container for a renderer element.
+ * Handles two YouTube markup variants:
+ *   - Lockup markup (home, subscriptions, some search builds):
+ *       a.yt-lockup-view-model__content-image > yt-thumbnail-view-model
+ *   - Legacy markup (channel pages, grid renderers, some search builds):
+ *       ytd-thumbnail > a#thumbnail
+ */
+function findThumbnail(renderer: Element): ThumbnailRef | null {
+  // Lockup markup — light DOM
+  const newAnchor = renderer.querySelector<HTMLAnchorElement>(THUMB_LINK_SEL);
+  if (newAnchor) {
+    const container = newAnchor.querySelector("yt-thumbnail-view-model") ?? newAnchor;
+    return { anchor: newAnchor, container };
+  }
 
-  // Fallback: yt-lockup-view-model may render via shadow DOM on some builds.
+  // Lockup markup — shadow DOM (some YouTube builds)
   const lockup = renderer.querySelector("yt-lockup-view-model");
   if (lockup?.shadowRoot) {
     const inShadow = lockup.shadowRoot.querySelector<HTMLAnchorElement>(THUMB_LINK_SEL);
-    if (inShadow) return inShadow;
+    if (inShadow) {
+      const container = inShadow.querySelector("yt-thumbnail-view-model") ?? inShadow;
+      return { anchor: inShadow, container };
+    }
+  }
+
+  // Legacy markup: channel pages, ytd-rich-item-renderer, ytd-grid-video-renderer
+  const ytdThumb = renderer.querySelector<Element>("ytd-thumbnail");
+  const legacyAnchor = ytdThumb?.querySelector<HTMLAnchorElement>("a#thumbnail") ?? null;
+  if (legacyAnchor && ytdThumb) {
+    // Inject into div#overlays (already inside the image bounds, same as YouTube's
+    // own resume bar and duration badge) rather than ytd-thumbnail itself which
+    // places the bar outside/below the image area.
+    const overlaysDiv = legacyAnchor.querySelector<Element>("div#overlays") ?? ytdThumb;
+    return { anchor: legacyAnchor, container: overlaysDiv };
   }
 
   return null;
 }
 
 function extractVideoUrl(renderer: Element): string | null {
-  const a = findThumbnailAnchor(renderer);
-  if (!a?.href) return null;
-  const match = a.href.match(/[?&]v=([\w-]+)/);
+  const ref = findThumbnail(renderer);
+  if (!ref?.anchor.href) return null;
+  const match = ref.anchor.href.match(/[?&]v=([\w-]+)/);
   return match ? `https://www.youtube.com/watch?v=${match[1]}` : null;
 }
 
@@ -226,24 +256,20 @@ async function markVisibleThumbnails(): Promise<void> {
     const p = progressMap.get(url);
 
     for (const renderer of els) {
-      const thumbAnchor = findThumbnailAnchor(renderer);
-
-      // The overlay goes inside yt-thumbnail-view-model, which is sized exactly
-      // to the thumbnail image. Appending to the <a> parent breaks the layout.
-      const thumbViewModel = thumbAnchor?.querySelector("yt-thumbnail-view-model") ?? null;
+      const thumbRef = findThumbnail(renderer);
 
       if (!p) {
         renderer.removeAttribute(MARKED_ATTR);
-        thumbViewModel?.querySelector(`.${OVERLAY_CLASS}`)?.remove();
+        thumbRef?.container.querySelector(`.${OVERLAY_CLASS}`)?.remove();
         continue;
       }
 
       renderer.setAttribute(MARKED_ATTR, p.isCompleted ? "complete" : "partial");
 
-      if (!thumbViewModel) continue;
+      if (!thumbRef) continue;
 
-      thumbViewModel.querySelector(`.${OVERLAY_CLASS}`)?.remove();
-      thumbViewModel.appendChild(buildOverlay(p));
+      thumbRef.container.querySelector(`.${OVERLAY_CLASS}`)?.remove();
+      thumbRef.container.appendChild(buildOverlay(p));
     }
   }
 }

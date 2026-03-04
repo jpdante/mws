@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using MyWatchState.Application.Dtos.Progress;
 using MyWatchState.Domain.Entities;
+using MyWatchState.Domain.Enums;
 using MyWatchState.Helpers;
 using MyWatchState.Infrastructure.Data;
 
@@ -32,9 +33,12 @@ public class ProgressController : ControllerBase {
     var user = await GetOrCreateUserAsync(ct);
     var now = DateTimeOffset.UtcNow;
 
-    // Normalize and deduplicate URLs within this batch
+    // Normalize and deduplicate URLs within this batch.
+    // Drop entries where a known platform couldn't extract a video ID — those are
+    // non-video pages (e.g. /feed, /channel) that shouldn't be tracked.
     var entries = request.Entries
       .Select(e => (Raw: e, Normalized: UrlNormalizer.Normalize(e.Url)))
+      .Where(e => e.Normalized.Platform == VideoPlatform.Generic || e.Normalized.PlatformVideoId != null)
       .DistinctBy(e => e.Normalized.Url)
       .ToList();
 

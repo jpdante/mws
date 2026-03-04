@@ -17,6 +17,7 @@ packages/
 ## JetBrains Rider
 riderModule.iml
 /_ReSharper.Caches/
+.idea
 
 ## Published output
 publish/

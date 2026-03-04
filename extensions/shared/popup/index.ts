@@ -196,7 +196,7 @@ btnBackLogin.addEventListener('click', () => {
 
 btnLogin.addEventListener('click', async () => {
   loginError.textContent = ''
-  btnLogin.textContent   = t.btnOpeningKeycloak
+  btnLogin.textContent   = t.btnSigningIn
   btnLogin.setAttribute('disabled', '')
 
   const res = await sendMsg({ type: 'LOGIN' }) as OkResponse

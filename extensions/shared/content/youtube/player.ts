@@ -19,9 +19,9 @@ export type PlayerCallback = (state: PlayerState) => void
 let attachedVideo: HTMLVideoElement | null = null
 let lastReportedTime = -1
 
-function getCanonicalUrl(): string {
+function getCanonicalUrl(): string | null {
   const v = new URLSearchParams(location.search).get('v')
-  return v ? `https://www.youtube.com/watch?v=${v}` : location.href
+  return v ? `https://www.youtube.com/watch?v=${v}` : null
 }
 
 function getTitle(): string {
@@ -41,13 +41,15 @@ function attachListeners(video: HTMLVideoElement, callback: PlayerCallback): voi
   lastReportedTime = -1
 
   video.addEventListener('timeupdate', () => {
+    const url = getCanonicalUrl()
+    if (!url) return
     if (!video.duration || video.duration <= 0) return
     if (Math.abs(video.currentTime - lastReportedTime) < THROTTLE_SECONDS) return
 
     lastReportedTime = video.currentTime
 
     callback({
-      url:             getCanonicalUrl(),
+      url,
       title:           getTitle(),
       progressSeconds: video.currentTime,
       durationSeconds: video.duration,
