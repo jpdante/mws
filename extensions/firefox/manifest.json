@@ -16,6 +16,7 @@
   ],
   "background": {
     "service_worker": "background/service-worker.js",
+    "scripts": ["background/service-worker.js"],
     "type": "module"
   },
   "content_scripts": [
@@ -47,8 +48,12 @@
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "mywatchstate@example.com",
-      "strict_min_version": "128.0"
+      "id": "{ca3e1f2d-8b47-4a9c-b6d0-5e2f7a310e8c}",
+      "strict_min_version": "128.0",
+      "data_collection_permissions": {
+        "required": ["websiteActivity"],
+        "optional": ["technicalAndInteraction"]
+      }
     }
   },
   "icons": {
